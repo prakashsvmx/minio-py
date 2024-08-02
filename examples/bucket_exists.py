@@ -13,16 +13,42 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import io
 
 from minio import Minio
+from minio.commonconfig import Tags
 
 client = Minio(
-    "play.min.io",
-    access_key="Q3AM3UQ867SPQQA43P2F",
-    secret_key="zuf+tfteSlswRu7BJ86wekitnifILbZam1KYY3TG",
+    'localhost:22000',
+    access_key='minio',
+    secret_key='minio123',
+    secure=False,
 )
 
-if client.bucket_exists("my-bucket"):
-    print("my-bucket exists")
-else:
-    print("my-bucket does not exist")
+# if client.bucket_exists("my-bucket"):
+#     print("my-bucket exists")
+# else:
+#     client.make_bucket("my-bucket")
+#     print("my-bucket created")
+#
+# objectList =client.list_objects("my-bucket" ,recursive=True )
+# for obj in objectList:
+#     print("object----")
+#     print(vars(obj))
+#
+
+# Upload data.
+tags = Tags(for_object=True)
+tags["User"] = "jsmith"
+result = client.put_object(
+    "public-bucket", "2.txt", io.BytesIO(b"hello"), 5,
+    tags=tags,
+)
+
+
+
+print(
+    "created {0} object; etag: {1}, version-id: {2}".format(
+        result.object_name, result.etag, result.version_id,
+    ),
+)

@@ -1,38 +1,41 @@
-# -*- coding: utf-8 -*-
-# MinIO Python Library for Amazon S3 Compatible Cloud Storage,
-# (C) 2022 MinIO, Inc.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-#
-
 from minio import Minio
-from minio.credentials import CertificateIdentityProvider
+import urllib3
+from minio.credentials.providers import CertificateIdentityProvider
+
+import ssl
+context = ssl._create_unverified_context()
+
+
+httpSClient = urllib3.PoolManager(
+    cert_reqs='CERT_REQUIRED',
+    ca_certs='/home/prakash/tmpwork/certs/public.crt')
+
+httpCClient = urllib3.PoolManager(
+    cert_file="/home/prakash/tmpwork/python-test-certs/client.crt",
+    cert_reqs="CERT_REQUIRED",
+    key_file="/home/prakash/tmpwork/python-test-certs/client.key",
+    key_password=""
+)
 
 # STS endpoint usually point to MinIO server.
-sts_endpoint = "https://STS-HOST:STS-PORT/"
+sts_endpoint = "https://localhost:22000/"
 
 # client certificate file
-cert_file = "/path/to/client.pem"
+cert_file = "/home/prakash/tmpwork/python-test-certs/client.crt"
 
 # client private key
-key_file = "/path/to/client.key"
+key_file = "/home/prakash/tmpwork/python-test-certs/client.key"
 
 provider = CertificateIdentityProvider(
     sts_endpoint, cert_file=cert_file, key_file=key_file,
+    http_client=httpCClient
 )
 
-client = Minio("MINIO-HOST:MINIO-PORT", credentials=provider)
+client = Minio("localhost:22000", credentials=provider,  secure=True,
+               cert_check=False,)
 
 # Get information of an object.
-stat = client.stat_object("my-bucket", "my-object")
-print(stat)
+# List objects information.
+objects = client.list_objects("test-bucket")
+for obj in objects:
+    print(obj)

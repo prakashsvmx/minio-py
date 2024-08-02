@@ -1,0 +1,24 @@
+
+
+object_instances = minio_client.list_objects(bucket, "", include_version=True)
+delete_objects = [
+    DeleteObject(name=object_instance.object_name, version_id=object_instance.version_id)
+    for object_instance in object_instances
+]
+
+for dl in delete_objects:
+    print(dl._name, dl._version_id)
+
+print(delete_objects)
+#minio_client.remove_objects(bucket, delete_objects)
+
+object_instances = minio_client.list_objects(bucket, "", include_version=True)
+for object_instance in object_instances:
+    minio_client.remove_object(
+        bucket, object_name=object_instance.object_name, version_id=object_instance.version_id
+    )
+
+
+#objects = minioClient.list_objects(bucket_name=bucket, prefix="", include_version=True, recursive=False, use_api_v1=False)
+#for obj in objects:
+#    print(obj.object_name, obj.size, obj.version_id)
